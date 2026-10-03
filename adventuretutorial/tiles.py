@@ -72,10 +72,14 @@ class LootRoom(MapTile):
     """A room that adds something to the player's inventory"""
     def __init__(self, x, y, item):
         self.item = item
+        self.picked_up = False
         super().__init__(x, y)
 
     def add_loot(self, the_player):
+        if self.picked_up:
+            return
         the_player.inventory.append(self.item)
+        self.picked_up = True
 
     def modify_player(self, the_player):
         self.add_loot(the_player)
@@ -86,7 +90,12 @@ class FindDaggerRoom(LootRoom):
         super().__init__(x, y, items.Dagger())
 
     def intro_text(self):
-        return """
+        if self.picked_up:
+            return """
+            An empty corner where the dagger used to be.
+            """
+        else:
+            return """
         You notice something shiny in the corner.
         It's a dagger! You pick it up.
         """
@@ -97,7 +106,12 @@ class Find5GoldRoom(LootRoom):
         super().__init__(x, y, items.Gold(5))
 
     def intro_text(self):
-        return """
+        if self.picked_up:
+            return """
+            An empty patch of ground where the gold piece used to be.
+            """
+        else:
+            return """
         Someone dropped a 5 gold piece. You pick it up.
         """
 
@@ -116,7 +130,7 @@ class EnemyRoom(MapTile):
         if self.enemy.is_alive():
             return [actions.Flee(tile=self), actions.Attack(enemy=self.enemy)]
         else:
-            return self.adjacent_moves()
+            return super().available_actions()
 
 
 class GiantSpiderRoom(EnemyRoom):

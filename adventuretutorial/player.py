@@ -25,9 +25,15 @@ class Player():
             print(item, '\n')
 
     def move(self, dx, dy):
-        self.location_x += dx
-        self.location_y += dy
-        print(world.tile_exists(self.location_x, self.location_y).intro_text())
+        new_x = self.location_x + dx
+        new_y = self.location_y + dy
+        tile = world.tile_exists(new_x, new_y)
+        if tile is None:
+            print("You can't go that way.")
+            return
+        self.location_x = new_x
+        self.location_y = new_y
+        print(tile.intro_text())
 
     def move_north(self):
         self.move(dx=0, dy=-1)

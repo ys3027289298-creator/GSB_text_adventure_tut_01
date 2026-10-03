@@ -13,18 +13,17 @@ def tile_exists(x, y):
         return _world.get((x, y))
 
 
-def load_tiles():
+def load_tiles(map_file='resources/map.txt'):
     """Parses a file that describes the world space into the _world object"""
-    with open('resources/map.txt', 'r') as f:
+    global _world, starting_position
+    _world = {}
+    with open(map_file, 'r') as f:
         rows = f.readlines()
-    x_max = len(rows[0].split('\t'))
     for y in range(len(rows)):
         cols = rows[y].split('\t')
-        for x in range(x_max):
-            tile_name = cols[x].replace('\n', '')
+        for x in range(len(cols)):
+            tile_name = cols[x].strip()
             if tile_name == 'StartingRoom':
-                global starting_position
                 starting_position = (x, y)
             _world[(x, y)] = None if tile_name == '' else getattr(__import__('tiles'), tile_name)(x, y)
-
 
