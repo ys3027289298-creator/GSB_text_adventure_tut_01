@@ -72,10 +72,13 @@ class LootRoom(MapTile):
     """A room that adds something to the player's inventory"""
     def __init__(self, x, y, item):
         self.item = item
+        self.looted = False
         super().__init__(x, y)
 
     def add_loot(self, the_player):
-        the_player.inventory.append(self.item)
+        if not self.looted:
+            the_player.inventory.append(self.item)
+            self.looted = True
 
     def modify_player(self, the_player):
         self.add_loot(the_player)
@@ -116,7 +119,10 @@ class EnemyRoom(MapTile):
         if self.enemy.is_alive():
             return [actions.Flee(tile=self), actions.Attack(enemy=self.enemy)]
         else:
-            return self.adjacent_moves()
+            moves = self.adjacent_moves()
+            moves.append(actions.ViewInventory())
+            moves.append(actions.SaveAndExit())
+            return moves
 
 
 class GiantSpiderRoom(EnemyRoom):
@@ -162,6 +168,11 @@ class SnakePitRoom(MapTile):
 
 
 class LeaveCaveRoom(MapTile):
+    def guardian_is_alive(self):
+        """The cave exit is guarded by the enemy on the tile directly south."""
+        guardian_tile = world.tile_exists(self.x, self.y + 1)
+        return isinstance(guardian_tile, EnemyRoom) and guardian_tile.enemy.is_alive()
+
     def intro_text(self):
         return """
         You see a bright light in the distance...
@@ -172,4 +183,5 @@ class LeaveCaveRoom(MapTile):
         """
 
     def modify_player(self, player):
-        player.victory = True
+        if not self.guardian_is_alive():
+            player.victory = True

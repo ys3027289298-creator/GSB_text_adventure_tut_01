@@ -25,8 +25,13 @@ class Player():
             print(item, '\n')
 
     def move(self, dx, dy):
-        self.location_x += dx
-        self.location_y += dy
+        new_x = self.location_x + dx
+        new_y = self.location_y + dy
+        if not world.tile_exists(new_x, new_y):
+            print("You can't go that way!")
+            return
+        self.location_x = new_x
+        self.location_y = new_y
         print(world.tile_exists(self.location_x, self.location_y).intro_text())
 
     def move_north(self):
@@ -50,6 +55,9 @@ class Player():
                     max_dmg = i.damage
                     best_weapon = i
 
+        if best_weapon is None:
+            print("You have no weapon to attack with!")
+            return
         print("You use {} against {}!".format(best_weapon.name, enemy.name))
         enemy.hp -= best_weapon.damage
         if not enemy.is_alive():
@@ -60,6 +68,9 @@ class Player():
     def flee(self, tile):
         """Moves the player randomly to an adjacent tile"""
         available_moves = tile.adjacent_moves()
+        if not available_moves:
+            print("There is nowhere to flee!")
+            return
         r = random.randint(0, len(available_moves) - 1)
         self.do_action(available_moves[r])
 

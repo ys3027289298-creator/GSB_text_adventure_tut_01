@@ -30,10 +30,14 @@ def game_loop(player):
             for action in available_actions:
                 print(action)
             action_input = input('Action: ')
+            action_chosen = False
             for action in available_actions:
                 if action_input == action.hotkey:
                     player.do_action(action, **action.kwargs)
+                    action_chosen = True
                     break
+            if not action_chosen:
+                print("Invalid action. Please choose one of the listed actions.")
 
 def check_for_save():
     if Path("saved_player.p").is_file() and Path("saved_world.p").is_file():
